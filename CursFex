@@ -1,0 +1,101 @@
+Create database CursFex
+go
+ use CursFex
+
+
+ Create table curso(
+codigo_curso int not null Primary key,
+nome_curso varchar(100) not null,
+duracao int not null
+ )
+
+Create table disciplinas(
+codigo_discipliana int not null Primary key,
+nome_discipliana varchar(100) not null,
+horario int not null
+ )
+
+
+ Create table disci_curso(
+ disciplina_codi int not null,
+ curso_codi int not null,
+primary key (disciplina_codi,curso_codi),
+FOREIGN KEY (curso_codi) REFERENCES curso(codigo_curso),
+FOREIGN KEY (disciplina_codi) REFERENCES disciplinas(codigo_discipliana)
+ )
+
+  delete curso
+ delete disciplinas
+ delete disci_curso
+ 
+
+ insert into curso Values
+ (0,'ADS',2880),
+ (1,'Logistica',2880),
+ (2,'Polímeros',2880),
+ (3,'Comércio Exterior',2600),
+ (4,'Gestão Empresarial',2600)
+ insert into disciplinas Values
+(1,'Algoritmos',80),
+(2,'Administração',80),
+(3,'Laboratório de Hardware',40),
+(4,'Pesquisa Operacional',80),
+(5,'Física I',80),
+(6,'Físico Química',80),
+(7,'Comércio Exterior',80),
+(8,'Fundamentos de Marketing',80),
+(9,'Informática',40),
+(10,'Sistemas de Informação',80)
+ insert into disci_curso Values
+ (1,0),
+ (2,0),
+  (2,1),
+ (2,3),
+ (2,4),
+ (3,0),
+ (4,1),
+ (5,2),
+  (6,2),
+ (7,1),
+ (7,3),
+ (8,1),
+ (8,4),
+(9,1),
+ (9,3),
+ (10,0),
+ (10,4)
+
+ Create   function f_curso(@id_curso int)
+ RETURNS @Tabela table
+ (
+ disciplina_codi int,
+ nome_discipliana varchar(100),
+ curso_codi int,
+ nome_curso varchar(100)
+ )
+ as
+ begin
+	Declare @id_disciplina int,
+				  @n_disci varchar(100),
+				 @c_horaria int,
+				 @n_curso varchar(100)
+			Declare c_cursor cursor
+			for select disciplina_codi from disci_curso where curso_codi =@id_curso
+			 open c_cursor
+			 FETCH NEXT FROM  c_cursor INTO @id_disciplina
+			 set @n_curso = (select nome_curso from curso where curso.codigo_curso =@id_curso )
+			 while @@FETCH_STATUS=0
+			 begin
+					select @n_disci = disci.nome_discipliana,@c_horaria = disci.codigo_discipliana
+						 from disciplinas disci
+						 where disci.codigo_discipliana = @id_disciplina
+
+						 insert into @Tabela values(@id_disciplina ,@n_disci,@c_horaria ,@n_curso )
+						 FETCH NEXT FROM  c_cursor INTO @id_disciplina
+			 end
+			   CLOSE c_cursor
+			   DEALLOCATE c_cursor 
+			   RETURN 
+end
+
+select * from f_curso(2) 
